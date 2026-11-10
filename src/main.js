@@ -1,25 +1,16 @@
 import './styles/main.css';
 
-import { createBusiness, getBusiness } from './models/businessModel';
-// import { createAccount } from './models/accountModel';
-
-// import {
-//   createTransaction,
-//   getTransactionsByAccount,
-//   getAccountBalance,
-//   updateTransaction,
-//   deleteTransaction
-// } from './models/transactionModel';
+import { getBusiness } from './models/businessModel';
 
 import {
-  createCategory,
-  getCategories,
-  getCategoriesByType,
-  updateCategory,
-  deleteCategory
-} from './models/categoryModel';
+  getTransactionFormData,
+  registerTransaction,
+  getTransactionsData,
+  editTransaction,
+  removeTransaction
+} from './viewmodels/transactionsViewModel';
 
-async function testCategories() {
+async function testTransactionsViewModel() {
   try {
     const business = await getBusiness();
 
@@ -27,43 +18,49 @@ async function testCategories() {
       throw new Error('Cadastre um negócio antes de testar.');
     }
 
-    // Cadastro
-    const category = await createCategory({
-      businessId: business.id,
-      name: 'Marketing',
-      type: 'expense'
+    // Carrega os dados necessários para o formulário.
+    const formData = await getTransactionFormData(business.id);
+
+    console.log('Contas disponíveis:', formData.accounts);
+    console.log('Categorias disponíveis:', formData.categories);
+
+    if (formData.accounts.length === 0) {
+      throw new Error('Cadastre uma conta antes de testar.');
+    }
+
+    // Cadastra uma movimentação.
+    const transaction = await registerTransaction({
+      accountId: formData.accounts[0].id,
+      categoryId: '',
+      type: 'income',
+      description: 'Venda de teste',
+      amount: '150,75',
+      date: '2026-11-10'
     });
 
-    console.log('Categoria cadastrada:', category);
+    console.log('Movimentação cadastrada:', transaction);
 
-    // Listagem
-    console.log(
-      'Todas as categorias:',
-      await getCategories(business.id)
-    );
+    // Lista as movimentações.
+    const transactions = await getTransactionsData(business.id);
 
-    // Listagem por tipo
-    console.log(
-      'Categorias de despesas:',
-      await getCategoriesByType(business.id, 'expense')
-    );
+    console.log('Movimentações:', transactions);
 
-    // Edição
-    const updated = await updateCategory(
-      category.id,
-      'Marketing e publicidade'
-    );
+    // Edita a movimentação.
+    const updated = await editTransaction(transaction.id, {
+      description: 'Venda atualizada',
+      amount: '200,00'
+    });
 
-    console.log('Categoria atualizada:', updated);
+    console.log('Movimentação atualizada:', updated);
 
-    // Exclusão
-    await deleteCategory(category.id);
+    // Exclui a movimentação.
+    await removeTransaction(transaction.id);
 
-    console.log('Categoria excluída com sucesso.');
+    console.log('Movimentação excluída com sucesso.');
 
   } catch (error) {
-    console.error('Erro nos testes:', error);
+    console.error('Erro no teste:', error);
   }
 }
 
-testCategories();
+testTransactionsViewModel();
