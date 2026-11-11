@@ -1,32 +1,44 @@
 
-import { createAccount, getAccounts } from '../models/accountModel';
-import { getAccountBalance } from '../models/transactionModel';
+import {
+  createAccount,
+  getAccounts,
+  updateAccount,
+  deleteAccount
+} from '../models/accountModel';
 
-// Converte um valor em reais para centavos.
+import {
+  getAccountBalance
+} from '../models/transactionModel';
+
+// Converte reais para centavos.
 function convertToCents(value) {
-  if (value === '' || value === null || value === undefined) {
+  if (
+    value === '' ||
+    value === null ||
+    value === undefined
+  ) {
     return 0;
   }
 
   let normalizedValue = String(value).trim();
 
-  // Aceita formatos brasileiros, como 1.250,00.
   if (normalizedValue.includes(',')) {
     normalizedValue = normalizedValue
       .replace(/\./g, '')
       .replace(',', '.');
   }
 
-  // Aceita somente valores não negativos com até duas casas decimais.
   if (!/^\d+(\.\d{1,2})?$/.test(normalizedValue)) {
     throw new Error('Informe um saldo inicial válido.');
   }
 
   const amount = Number(normalizedValue);
-
   const amountCents = Math.round(amount * 100);
 
-  if (!Number.isSafeInteger(amountCents)) {
+  if (
+    !Number.isSafeInteger(amountCents) ||
+    amountCents < 0
+  ) {
     throw new Error('Saldo inicial inválido.');
   }
 
@@ -72,4 +84,22 @@ export async function registerAccount(formData) {
     type,
     initialBalanceCents
   });
+}
+
+// Edita uma conta existente.
+export async function editAccount(accountId, formData) {
+  const initialBalanceCents = convertToCents(
+    formData.initialBalance
+  );
+
+  return updateAccount(accountId, {
+    name: formData.name,
+    type: formData.type,
+    initialBalanceCents
+  });
+}
+
+// Exclui uma conta.
+export async function removeAccount(accountId) {
+  return deleteAccount(accountId);
 }
