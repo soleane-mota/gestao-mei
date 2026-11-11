@@ -1,29 +1,99 @@
+@import './components.css';
+@import './responsive.css';
+
+/* ========================================
+   1. IDENTIDADE VISUAL
+======================================== */
+
 :root {
-  font-family: Arial, Helvetica, sans-serif;
-  color: #25283a;
-  background-color: #f8f9fc;
+  /* Cores principais */
+  --color-white: #ffffff;
+  --color-primary: #9875b5;
+  --color-primary-light: #dbb9fa;
+  --color-primary-dark: #3a2e45;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  --color-secondary: #8076c8;
+  --color-secondary-light: #c0b9fb;
 
-  --color-primary: #5965a8;
-  --color-background: #f8f9fc;
+  /* Cores funcionais */
+  --color-background: #f8f7fa;
   --color-surface: #ffffff;
-  --color-text: #25283a;
-  --color-muted: #777d91;
-  --color-border: #e5e7ef;
+  --color-surface-hover: #f3eff7;
+
+  --color-text: #211d24;
+  --color-text-secondary: #625c68;
+  --color-border: #e5e0e9;
+
+  --color-success: #287d52;
+  --color-success-light: #e5f4eb;
+
+  --color-danger: #ba3535;
+  --color-danger-light: #fdeaea;
+
+  --color-warning: #93651c;
+  --color-warning-light: #fff4dc;
+
+  /* Tipografia */
+  --font-family: Roboto, Arial, sans-serif;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.75rem;
+
+  /* Espaçamentos */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Bordas e sombras */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+
+  --shadow-card: 0 2px 8px rgba(58, 46, 69, 0.07);
+
+  --shadow-hover: 0 4px 14px rgba(58, 46, 69, 0.12);
+
+  /* Layout */
+  --content-max-width: 1200px;
+
+  /* Foco acessível */
+  --focus-ring: 0 0 0 3px rgba(128, 118, 200, 0.28);
 }
 
+/* ========================================
+   2. RESET E CONFIGURAÇÕES GLOBAIS
+======================================== */
+
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
-body {
+html {
   min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
   min-height: 100vh;
+
   background-color: var(--color-background);
+  color: var(--color-text);
+
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  line-height: 1.5;
+
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -37,22 +107,61 @@ button {
   cursor: pointer;
 }
 
-.app-container {
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+input,
+select,
+textarea {
+  color: var(--color-text);
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--color-primary-dark);
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+}
+
+h2 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+}
+
+h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+#app {
   width: 100%;
   min-height: 100vh;
+  padding: var(--space-4);
 }
 
-.welcome {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 40px 24px;
+/* Seleção de texto */
+::selection {
+  background-color: var(--color-secondary-light);
+  color: var(--color-primary-dark);
 }
 
-.welcome h1 {
-  font-size: 1.6rem;
-  margin-bottom: 8px;
-}
-
-.welcome p {
-  color: var(--color-muted);
+/* Foco visível para navegação por teclado */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }

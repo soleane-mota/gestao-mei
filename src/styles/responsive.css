@@ -1,0 +1,98 @@
+
+/* ========================================
+   1. TABLETS
+======================================== */
+
+@media (min-width: 600px) {
+  #app {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-6);
+  }
+
+  .dashboard-header,
+  .transaction-header,
+  .account-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .dashboard-header {
+    flex-wrap: wrap;
+  }
+
+  .dashboard-header__action {
+    width: auto;
+  }
+
+  .account-list,
+  .transaction-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .account-form,
+  .transaction-form {
+    padding: var(--space-6);
+  }
+
+  .account-form__submit,
+  .transaction-form__submit {
+    width: auto;
+    min-width: 200px;
+    align-self: flex-start;
+  }
+
+  .account-card__actions button,
+  .transaction-card__actions button {
+    flex: 0 1 auto;
+    min-width: 100px;
+  }
+}
+
+/* ========================================
+   2. DESKTOPS
+======================================== */
+
+@media (min-width: 900px) {
+  #app {
+    padding: var(--space-8);
+  }
+
+  .account-list,
+  .transaction-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dashboard-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .dashboard-accounts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .account-form-section,
+  .transaction-form-section {
+    max-width: 760px;
+  }
+}
+
+/* ========================================
+   3. ACESSIBILIDADE E MOVIMENTO
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

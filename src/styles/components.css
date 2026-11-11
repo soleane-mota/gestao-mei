@@ -1,0 +1,377 @@
+/* ========================================
+   1. BOTÕES
+======================================== */
+
+button {
+  min-height: 44px;
+  padding: 0.625rem 1rem;
+
+  border: none;
+  border-radius: var(--radius-md);
+
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.dashboard-header__action,
+.transaction-header__back,
+.account-header__back {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.dashboard-header__action:hover,
+.transaction-header__back:hover,
+.account-header__back:hover {
+  background-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-hover);
+}
+
+.transaction-form__submit,
+.account-form__submit {
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+}
+
+.transaction-form__submit:hover,
+.account-form__submit:hover {
+  background-color: #6e63b7;
+}
+
+.transaction-form__cancel,
+.account-form__cancel {
+  background-color: var(--color-surface-hover);
+  color: var(--color-primary-dark);
+  border: 1px solid var(--color-border);
+}
+
+.transaction-form__cancel:hover,
+.account-form__cancel:hover {
+  background-color: var(--color-primary-light);
+}
+
+.transaction-card__edit,
+.account-card__edit {
+  background-color: var(--color-secondary-light);
+  color: var(--color-primary-dark);
+}
+
+.transaction-card__edit:hover,
+.account-card__edit:hover {
+  background-color: var(--color-primary-light);
+}
+
+.transaction-card__delete,
+.account-card__delete {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.transaction-card__delete:hover,
+.account-card__delete:hover {
+  background-color: #f8d5d5;
+}
+
+/* ========================================
+   2. CABEÇALHOS
+======================================== */
+
+.dashboard-header,
+.transaction-header,
+.account-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dashboard-header__title,
+.transaction-header__title,
+.account-header__title {
+  margin-bottom: 0;
+}
+
+.dashboard-header__action {
+  width: 100%;
+}
+
+/* ========================================
+   3. CARDS E SEÇÕES
+======================================== */
+
+.dashboard-summary,
+.dashboard-accounts,
+.dashboard-recent-transactions,
+.account-form-section,
+.account-list-section,
+.transaction-form-section,
+.transaction-list-section {
+  margin-bottom: var(--space-6);
+}
+
+.dashboard-summary__card,
+.summary-card,
+.account-card,
+.transaction-card {
+  background-color: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  padding: var(--space-4);
+
+  box-shadow: var(--shadow-card);
+}
+
+.account-list,
+.transaction-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.account-card,
+.transaction-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.account-card__name,
+.transaction-card__description {
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-lg);
+}
+
+.account-card__type,
+.transaction-card__details {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.account-card__balance-label {
+  display: block;
+  margin-top: var(--space-3);
+
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.account-card__balance {
+  margin-bottom: var(--space-3);
+
+  color: var(--color-primary-dark);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.account-card__actions,
+.transaction-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+
+  border-top: 1px solid var(--color-border);
+}
+
+.account-card__actions button,
+.transaction-card__actions button {
+  flex: 1;
+}
+
+/* ========================================
+   4. FORMULÁRIOS
+======================================== */
+
+.account-form,
+.transaction-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  padding: var(--space-4);
+
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-card);
+}
+
+.account-form__label,
+.transaction-form__label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  color: var(--color-primary-dark);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.account-form__input,
+.transaction-form__input {
+  width: 100%;
+  min-height: 48px;
+
+  padding: 0.75rem;
+
+  background-color: var(--color-white);
+  border: 1px solid #c9c3ce;
+  border-radius: var(--radius-sm);
+
+  font-size: var(--font-size-md);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.account-form__input:hover,
+.transaction-form__input:hover {
+  border-color: var(--color-primary);
+}
+
+.account-form__input:focus,
+.transaction-form__input:focus {
+  outline: none;
+  border-color: var(--color-secondary);
+  box-shadow: var(--focus-ring);
+}
+
+.account-form__submit,
+.transaction-form__submit {
+  width: 100%;
+}
+
+.account-form__feedback,
+.transaction-form__feedback {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.account-form__feedback:empty,
+.transaction-form__feedback:empty {
+  display: none;
+}
+
+.account-form__feedback:not(:empty),
+.transaction-form__feedback:not(:empty) {
+  padding: var(--space-3);
+  background-color: var(--color-surface-hover);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary-dark);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ========================================
+   5. MOVIMENTAÇÕES
+======================================== */
+
+.transaction-card__amount {
+  margin: var(--space-3) 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.transaction-card__amount--income {
+  color: var(--color-success);
+}
+
+.transaction-card__amount--expense {
+  color: var(--color-danger);
+}
+
+/* ========================================
+   6. ESTADOS VAZIOS
+======================================== */
+
+.account-list__empty,
+.transaction-list__empty {
+  padding: var(--space-6);
+
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+/* ========================================
+   7. DASHBOARD - ELEMENTOS GERAIS
+======================================== */
+
+.dashboard-header__business-name {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+}
+
+.dashboard-summary__card h2,
+.summary-card h2 {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.dashboard-summary__card strong,
+.summary-card strong {
+  color: var(--color-primary-dark);
+  font-size: var(--font-size-xl);
+}
+
+/* ========================================
+   8. ONBOARDING
+======================================== */
+
+.onboarding-container,
+.onboarding {
+  width: 100%;
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: var(--space-5);
+
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+
+  box-shadow: var(--shadow-card);
+}
+
+.onboarding input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem;
+
+  border: 1px solid #c9c3ce;
+  border-radius: var(--radius-sm);
+}
+
+.onboarding button {
+  width: 100%;
+  margin-top: var(--space-3);
+
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
