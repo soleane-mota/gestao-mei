@@ -3,7 +3,7 @@ import {
   getTransactionFormData,
   getTransactionsData,
   registerTransaction
-} from '../viewmodels/transactionsViewModel';
+} from '../viewmodels/transactionViewModel';
 
 export async function renderTransactions(container, businessId, onBack) {
   container.innerHTML = `

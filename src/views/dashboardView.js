@@ -121,7 +121,7 @@ function renderRecentTransactions(transactions) {
   return section;
 }
 
-export async function renderDashboard(container, onNavigateTransactions) {
+export async function renderDashboard(container, onNavigateTransactions, onNavigateAcconunts) {
   container.innerHTML = '';
 
   container.append(
@@ -154,7 +154,19 @@ export async function renderDashboard(container, onNavigateTransactions) {
       }
     });
 
-    header.append(title, businessName, transactionsButton);
+    const accountsButton = createElement(
+      'button',
+      'dashboard-header__action',
+      'Contas'
+    );
+
+    accountsButton.addEventListener('click', () => {
+      if (typeof onNavigateAcconunts === 'function') {
+        onNavigateAcconunts();
+      }
+    });
+
+    header.append(title, businessName, transactionsButton, accountsButton);
 
     const summary = createElement('section', 'dashboard-summary');
     summary.append(

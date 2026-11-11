@@ -2,9 +2,10 @@
 import './styles/main.css';
 
 import { checkOnboarding } from './viewmodels/onboardingViewModel';
-import { renderDashboard } from './views/dashboardView';
 import { renderOnboarding } from './views/onboardingView';
+import { renderDashboard } from './views/dashboardView';
 import { renderTransactions } from './views/transactionsView';
+import { renderAccounts } from './views/accountView';
 
 async function init() {
   const app = document.querySelector('#app');
@@ -20,8 +21,26 @@ async function init() {
     return;
   }
 
-  await renderDashboard(app, () =>
-    renderTransactions(app, business.id, () => init())
+  await renderDashboard(
+    app,
+    () => showTransactions(app, business.id),
+    () => showAccounts(app, business.id)
+  );
+}
+
+async function showTransactions(app, businessId) {
+  await renderTransactions(
+    app,
+    businessId,
+    () => init()
+  );
+}
+
+async function showAccounts(app, businessId) {
+  await renderAccounts(
+    app,
+    businessId,
+    () => init()
   );
 }
 

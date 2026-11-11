@@ -9,15 +9,15 @@ export async function createAccount({
   type,
   initialBalanceCents = 0
 }) {
-  const normalizedName = name.trim();
-
   if (!businessId) {
     throw new Error('Negócio não informado.');
   }
 
-  if (!normalizedName) {
+  if (typeof name !== 'string' || !name.trim()) {
     throw new Error('Informe o nome da conta.');
   }
+
+  const normalizedName = name.trim();
 
   if (!allowedTypes.includes(type)) {
     throw new Error('Tipo de conta inválido.');
@@ -30,29 +30,58 @@ export async function createAccount({
     throw new Error('Saldo inicial inválido.');
   }
 
-  const business = await db.businesses.get(businessId);
+  return db.transaction(
+    'rw',
+    db.businesses,
+    db.accounts,
+    async () => {
+      const business = await db.businesses.get(businessId);
 
-  if (!business) {
-    throw new Error('Negócio não encontrado.');
-  }
+      if (!business) {
+        throw new Error('Negócio não encontrado.');
+      }
 
-  const account = {
-    id: crypto.randomUUID(),
-    businessId,
-    name: normalizedName,
-    type,
-    initialBalanceCents,
-    createdAt: new Date().toISOString()
-  };
+      const existingAccounts = await db.accounts
+        .where('businessId')
+        .equals(businessId)
+        .toArray();
 
-  await db.accounts.add(account);
+      const nameExists = existingAccounts.some(
+        account =>
+          account.name.toLowerCase() === normalizedName.toLowerCase()
+      );
 
-  return account;
+      if (nameExists) {
+        throw new Error('Já existe uma conta com esse nome.');
+      }
+
+      const account = {
+        id: crypto.randomUUID(),
+        businessId,
+        name: normalizedName,
+        type,
+        initialBalanceCents,
+        createdAt: new Date().toISOString()
+      };
+
+      await db.accounts.add(account);
+
+      return account;
+    }
+  );
 }
 
 export async function getAccounts(businessId) {
-  return db.accounts
+  if (!businessId) {
+    throw new Error('Negócio não informado.');
+  }
+
+  const accounts = await db.accounts
     .where('businessId')
     .equals(businessId)
     .toArray();
+
+  return accounts.sort((a, b) =>
+    a.name.localeCompare(b.name, 'pt-BR')
+  );
 }
