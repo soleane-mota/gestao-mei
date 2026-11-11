@@ -1,45 +1,87 @@
+
 import { db } from '../database/database';
 
 const allowedTypes = ['income', 'expense'];
 
-function validateAmount(amountCents) {
-  if (
-    !Number.isSafeInteger(amountCents) ||
-    amountCents <= 0
-  ) {
-    throw new Error('O valor deve ser um número inteiro positivo em centavos.');
-  }
-}
-
 function validateDate(date) {
-  if (
-    typeof date !== 'string' ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(date)
-  ) {
-    throw new Error('Informe uma data válida no formato AAAA-MM-DD.');
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error('Data da movimentação inválida.');
   }
 
-  const [year, month, day] = date.split('-').map(Number);
-  const parsedDate = new Date(Date.UTC(year, month - 1, day));
+  const parsedDate = new Date(`${date}T00:00:00.000Z`);
 
   if (
-    parsedDate.getUTCFullYear() !== year ||
-    parsedDate.getUTCMonth() !== month - 1 ||
-    parsedDate.getUTCDate() !== day
+    Number.isNaN(parsedDate.getTime()) ||
+    parsedDate.toISOString().slice(0, 10) !== date
   ) {
-    throw new Error('A data informada não existe.');
+    throw new Error('Data da movimentação inválida.');
   }
 }
 
-async function validateReferences({ accountId, categoryId, type }) {
+// Calcula o saldo da conta, podendo ignorar uma movimentação.
+async function calculateAccountBalance(accountId, excludedTransactionId = null) {
+  const account = await db.accounts.get(accountId);
+
+  if (!account) {
+    throw new Error('Conta não encontrada.');
+  }
+
+  const transactions = await db.transactions
+    .where('accountId')
+    .equals(accountId)
+    .toArray();
+
+  return transactions.reduce((balance, transaction) => {
+    if (transaction.id === excludedTransactionId) {
+      return balance;
+    }
+
+    if (transaction.type === 'income') {
+      return balance + transaction.amountCents;
+    }
+
+    return balance - transaction.amountCents;
+  }, account.initialBalanceCents);
+}
+
+// Valida os dados e as referências da movimentação.
+async function validateTransactionData(data, excludedTransactionId = null) {
+  const {
+    accountId,
+    categoryId = null,
+    type,
+    description,
+    amountCents,
+    date
+  } = data;
+
+  if (!accountId) {
+    throw new Error('Selecione uma conta.');
+  }
+
   if (!allowedTypes.includes(type)) {
     throw new Error('Tipo de movimentação inválido.');
   }
 
+  const normalizedDescription = typeof description === 'string' ? description.trim() : '';
+
+  if (!normalizedDescription) {
+    throw new Error('Informe a descrição da movimentação.');
+  }
+
+  if (
+    !Number.isSafeInteger(amountCents) ||
+    amountCents <= 0
+  ) {
+    throw new Error('Valor da movimentação inválido.');
+  }
+
+  validateDate(date);
+
   const account = await db.accounts.get(accountId);
 
   if (!account) {
-    throw new Error('Conta financeira não encontrada.');
+    throw new Error('Conta não encontrada.');
   }
 
   if (categoryId) {
@@ -49,19 +91,38 @@ async function validateReferences({ accountId, categoryId, type }) {
       throw new Error('Categoria não encontrada.');
     }
 
-    if (category.businessId !== account.businessId) {
-      throw new Error('A categoria não pertence ao negócio desta conta.');
-    }
-
-    if (category.type !== type) {
-      throw new Error('A categoria não corresponde ao tipo de movimentação.');
+    if (
+      category.businessId !== account.businessId ||
+      category.type !== type
+    ) {
+      throw new Error('Categoria incompatível com a movimentação.');
     }
   }
 
-  return account;
+  // Para despesas, verifica o saldo disponível.
+  if (type === 'expense') {
+    const availableBalance = await calculateAccountBalance(
+      accountId,
+      excludedTransactionId
+    );
+
+    if (amountCents > availableBalance) {
+      throw new Error(
+        'Saldo insuficiente. A despesa não pode ser maior que o saldo disponível na conta.'
+      );
+    }
+  }
+
+  return {
+    accountId,
+    categoryId: categoryId || null,
+    type,
+    description: normalizedDescription,
+    amountCents,
+    date
+  };
 }
 
-// Cadastra uma receita ou despesa.
 export async function createTransaction({
   accountId,
   categoryId = null,
@@ -70,35 +131,25 @@ export async function createTransaction({
   amountCents,
   date
 }) {
-  if (!accountId) {
-    throw new Error('Selecione uma conta financeira.');
-  }
-
-  if (!description?.trim()) {
-    throw new Error('Informe uma descrição para a movimentação.');
-  }
-
-  validateAmount(amountCents);
-  validateDate(date);
-
   return db.transaction(
     'rw',
+    db.transactions,
     db.accounts,
     db.categories,
-    db.transactions,
     async () => {
-      await validateReferences({ accountId, categoryId, type });
-
-      const transaction = {
-        id: crypto.randomUUID(),
+      const validatedData = await validateTransactionData({
         accountId,
         categoryId,
         type,
-        description: description.trim(),
+        description,
         amountCents,
-        date,
-        createdAt: new Date().toISOString(),
-        updatedAt: null
+        date
+      });
+
+      const transaction = {
+        id: crypto.randomUUID(),
+        ...validatedData,
+        createdAt: new Date().toISOString()
       };
 
       await db.transactions.add(transaction);
@@ -108,75 +159,57 @@ export async function createTransaction({
   );
 }
 
-// Busca uma movimentação pelo identificador.
 export async function getTransaction(transactionId) {
   return db.transactions.get(transactionId);
 }
 
-// Lista as movimentações de uma conta, da mais recente para a mais antiga.
 export async function getTransactionsByAccount(accountId) {
-  const transactions = await db.transactions
+  return db.transactions
     .where('accountId')
     .equals(accountId)
     .toArray();
-
-  return transactions.sort((a, b) => {
-    return (
-      b.date.localeCompare(a.date) ||
-      b.createdAt.localeCompare(a.createdAt)
-    );
-  });
 }
 
-// Edita uma movimentação existente.
 export async function updateTransaction(transactionId, changes) {
   return db.transaction(
     'rw',
+    db.transactions,
     db.accounts,
     db.categories,
-    db.transactions,
     async () => {
-      const existing = await db.transactions.get(transactionId);
+      const existingTransaction = await db.transactions.get(transactionId);
 
-      if (!existing) {
+      if (!existingTransaction) {
         throw new Error('Movimentação não encontrada.');
       }
 
-      const updated = {
-        ...existing,
-        ...changes,
-        description:
-          changes.description !== undefined
-            ? changes.description.trim()
-            : existing.description,
-        categoryId:
-          changes.categoryId !== undefined
-            ? changes.categoryId
-            : existing.categoryId,
+      const updatedData = {
+        ...existingTransaction,
+        ...changes
+      };
+
+      const validatedData = await validateTransactionData(
+        updatedData,
+        transactionId
+      );
+
+      const updatedTransaction = {
+        ...existingTransaction,
+        ...validatedData,
         updatedAt: new Date().toISOString()
       };
 
-      if (!updated.description) {
-        throw new Error('Informe uma descrição para a movimentação.');
-      }
+      await db.transactions.put(updatedTransaction);
 
-      validateAmount(updated.amountCents);
-      validateDate(updated.date);
-
-      await validateReferences(updated);
-
-      await db.transactions.put(updated);
-
-      return updated;
+      return updatedTransaction;
     }
   );
 }
 
-// Exclui uma movimentação.
 export async function deleteTransaction(transactionId) {
-  const existing = await db.transactions.get(transactionId);
+  const existingTransaction = await db.transactions.get(transactionId);
 
-  if (!existing) {
+  if (!existingTransaction) {
     throw new Error('Movimentação não encontrada.');
   }
 
@@ -185,21 +218,6 @@ export async function deleteTransaction(transactionId) {
   return true;
 }
 
-// Calcula o saldo atual de uma conta.
 export async function getAccountBalance(accountId) {
-  const account = await db.accounts.get(accountId);
-
-  if (!account) {
-    throw new Error('Conta financeira não encontrada.');
-  }
-
-  const transactions = await getTransactionsByAccount(accountId);
-
-  return transactions.reduce((balance, transaction) => {
-    if (transaction.type === 'income') {
-      return balance + transaction.amountCents;
-    }
-
-    return balance - transaction.amountCents;
-  }, account.initialBalanceCents);
+  return calculateAccountBalance(accountId);
 }
